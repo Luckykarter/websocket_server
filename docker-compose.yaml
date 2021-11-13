@@ -1,0 +1,68 @@
+version: "2.0"
+services:
+  websocket_server:
+    build:
+      context: .
+    command: daphne -b 0.0.0.0 -p 8000 websocket_server.asgi:application
+    depends_on:
+      - mysql
+      - redis
+    expose:
+      - 8000
+    networks:
+      - backend
+
+    volumes:
+      - static_volume:/app/static
+      - media_volume:/app/media
+    restart: always
+
+
+  nginx:
+    build: ./nginx
+    volumes:
+      - static_volume:/app/static
+      - media_volume:/app/media
+    ports:
+      - "86:80"
+    networks:
+      - backend
+    depends_on:
+      - websocket_server
+    restart: always
+
+
+  mysql:
+    image: mysql:5.7
+    command: mysqld --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4
+    container_name: websocket_mysql
+    expose:
+      - 3306
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD}
+      - MYSQL_DATABASE=${DB_NAME}
+    networks:
+      - backend
+    volumes:
+      - /etc/mysql.cnf:/app/config/mysql.cnf
+      - /root/websocket_server/databases:/app/databases/
+      - /var/lib/mysql_websocket:/var/lib/mysql
+
+  redis:
+    image: redis:5.0.7-alpine
+    expose:
+      - 6379
+    networks:
+      - backend
+    command: redis-server --appendonly yes
+    volumes:
+      - /var/lib/redis:/var/lib/redis
+
+
+volumes:
+  static_volume:
+  media_volume:
+
+networks:
+  backend:
