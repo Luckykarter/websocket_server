@@ -26,6 +26,7 @@ services:
       - /etc/ssl:/etc/ssl
     ports:
       - "86:80"
+      - "9443:9443"
     networks:
       - backend
     depends_on:
