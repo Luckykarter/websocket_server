@@ -23,6 +23,7 @@ services:
     volumes:
       - static_volume:/app/static
       - media_volume:/app/media
+      - /etc/ssl:/etc/ssl
     ports:
       - "86:80"
     networks:
