@@ -60,6 +60,7 @@ services:
     command: redis-server --appendonly yes
     volumes:
       - /var/lib/redis:/var/lib/redis
+    restart: always
 
 
 volumes:
